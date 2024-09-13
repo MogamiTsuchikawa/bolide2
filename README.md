@@ -1,38 +1,39 @@
-<p align="center"><img src="https://i.imgur.com/a9QWW0v.png"></p>
+# bolide2
 
-## Usage
+bolide2 は Zoom などのビデオ会議中に共有画面にて投稿されたコメントを流すデスクトップアプリケーションです。
 
-### Create an App
+## 対応環境
 
+- Windows x64
+- Windows arm64
+- MacOS universal(x64 + arm64)
+
+## インストール
+
+[リリースページ](https://github.com/bolide2/bolide2/releases)からダウンロードしてください。
+
+## 開発ロードマップ
+
+- [x] 初版リリース
+- [ ] スタンプ機能
+- [ ] bolide2 専用サーバーリリースと対応
+
+## 開発
+
+環境構築
+
+```bash
+npm i
 ```
-# with npx
-$ npx create-nextron-app my-app --example with-tailwindcss
 
-# with yarn
-$ yarn create nextron-app my-app --example with-tailwindcss
+アプリケーションの起動
 
-# with pnpm
-$ pnpm dlx create-nextron-app my-app --example with-tailwindcss
+```bash
+npm run dev
 ```
 
-### Install Dependencies
+アプリケーションのビルド
 
-```
-$ cd my-app
-
-# using yarn or npm
-$ yarn (or `npm install`)
-
-# using pnpm
-$ pnpm install --shamefully-hoist
-```
-
-### Use it
-
-```
-# development mode
-$ yarn dev (or `npm run dev` or `pnpm run dev`)
-
-# production build
-$ yarn build (or `npm run build` or `pnpm run build`)
+```bash
+npm run build
 ```
