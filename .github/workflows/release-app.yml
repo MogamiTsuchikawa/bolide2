@@ -1,4 +1,4 @@
-name: Release App
+name: Release Electron App
 
 on:
   push:
@@ -27,15 +27,13 @@ jobs:
         run: npm run build
 
       - name: Build Electron app
-        run: npx nextron build --win --${{ matrix.arch }}
+        run: npm run electron:build -- --${{ matrix.arch }}
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v3
         with:
-          draft: true
-          files: |
-            dist/*.dmg
+          name: windows-${{ matrix.arch }}
+          path: dist/*.exe
 
   build-macos:
     runs-on: macos-latest
@@ -55,12 +53,28 @@ jobs:
         run: npm run build
 
       - name: Build Electron app
-        run: npx nextron build --mac --universal
+        run: npm run electron:build
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos
+          path: dist/*.dmg
+
+  create-release:
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
-          draft: true
           files: |
-            dist/*.dmg
+            windows-x64/*.exe
+            windows-arm64/*.exe
+            macos/*.dmg
+          draft: true
+          prerelease: false
