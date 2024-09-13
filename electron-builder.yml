@@ -1,6 +1,6 @@
-appId: com.example.nextron
-productName: My Nextron App
-copyright: Copyright © 2018 Yoshihide Shiono
+appId: bolide2.mogami.dev
+productName: bolide2
+copyright: Copyright © 2024 MogamiTsuchikawa
 directories:
   output: dist
   buildResources: resources
