@@ -1,4 +1,4 @@
-name: Release Electron App
+name: Release App
 
 on:
   push:
@@ -58,12 +58,14 @@ jobs:
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v3
         with:
-          name: macos
+          name: macos-universal
           path: dist/*.dmg
 
   create-release:
     needs: [build-windows, build-macos]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Download artifacts
@@ -75,6 +77,6 @@ jobs:
           files: |
             windows-x64/*.exe
             windows-arm64/*.exe
-            macos/*.dmg
+            macos-universal/*.dmg
           draft: true
           prerelease: false
