@@ -2,7 +2,7 @@
   "private": true,
   "name": "my-nextron-app",
   "description": "My application description",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "author": "MogamiTsuchikawa",
   "main": "app/background.js",
   "scripts": {
@@ -11,8 +11,21 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
+    "@radix-ui/react-icons": "^1.3.0",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-navigation-menu": "^1.2.0",
+    "@radix-ui/react-select": "^2.1.1",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@types/axios": "^0.14.0",
+    "7.css": "^0.17.0",
+    "axios": "^1.7.7",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
     "electron-serve": "^1.3.0",
-    "electron-store": "^8.2.0"
+    "electron-store": "^8.2.0",
+    "lucide-react": "^0.441.0",
+    "tailwind-merge": "^2.5.2",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@types/node": "^20.11.16",
