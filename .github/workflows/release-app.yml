@@ -71,8 +71,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            artifacts/windows-x64/*.exe
-            artifacts/windows-arm64/*.exe
-            artifacts/macos-universal/*.dmg
+            /home/runner/work/bolide2/bolide2/artifacts/windows-x64/*.exe
+            /home/runner/work/bolide2/bolide2/artifacts/windows-arm64/*.exe
+            /home/runner/work/bolide2/bolide2/artifacts/macos-universal/*.dmg
           draft: true
           prerelease: false
