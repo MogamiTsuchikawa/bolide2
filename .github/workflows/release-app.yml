@@ -64,13 +64,15 @@ jobs:
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
+        with:
+          path: artifacts
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            windows-x64/*.exe
-            windows-arm64/*.exe
-            macos-universal/*.dmg
+            artifacts/windows-x64/*.exe
+            artifacts/windows-arm64/*.exe
+            artifacts/macos-universal/*.dmg
           draft: true
           prerelease: false
