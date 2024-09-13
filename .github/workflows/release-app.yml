@@ -76,6 +76,5 @@ jobs:
             windows-x64/*.exe
             windows-arm64/*.exe
             macos/*.dmg
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-# ... existing code ...
+          draft: false
+          prerelease: false
