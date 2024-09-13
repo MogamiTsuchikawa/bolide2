@@ -66,6 +66,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: artifacts
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
