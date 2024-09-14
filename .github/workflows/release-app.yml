@@ -38,6 +38,15 @@ jobs:
         with:
           name: windows-${{ matrix.arch }}
           path: dist/*.exe
+      - name: create release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          files: |
+            dist/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-macos:
     runs-on: macos-latest
@@ -61,29 +70,38 @@ jobs:
         with:
           name: macos-universal
           path: dist/*.dmg
-
-  create-release:
-    needs: [build-windows, build-macos]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
+      - name: create release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          path: artifacts
-      - name: Display structure of downloaded files
-        run: |
-          ls -R artifacts
-          find $PWD/artifacts -type f
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            artifacts/windows-x64/*.exe
-            artifacts/windows-arm64/*.exe
-            artifacts/macos-universal/*.dmg
           draft: true
-          prerelease: false
+          files: |
+            dist/*.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # create-release:
+  #   needs: [build-windows, build-macos]
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+
+  #   steps:
+  #     - name: Download artifacts
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         path: artifacts
+  #     - name: Display structure of downloaded files
+  #       run: |
+  #         ls -R artifacts
+  #         find $PWD/artifacts -type f
+
+  #     - name: Create Release
+  #       uses: softprops/action-gh-release@v2
+  #       with:
+  #         files: |
+  #           artifacts/windows-x64/*.exe
+  #           artifacts/windows-arm64/*.exe
+  #           artifacts/macos-universal/*.dmg
+  #         draft: true
+  #         prerelease: false
