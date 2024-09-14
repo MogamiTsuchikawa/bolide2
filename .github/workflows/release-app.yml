@@ -11,6 +11,8 @@ jobs:
     strategy:
       matrix:
         arch: [x64, arm64]
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v3
@@ -50,6 +52,8 @@ jobs:
 
   build-macos:
     runs-on: macos-latest
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v3
