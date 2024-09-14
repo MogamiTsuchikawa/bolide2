@@ -7,14 +7,24 @@ import { cn } from "@/lib/utils";
 import { useWebSocketValidation } from "@/hook/ws-validation";
 import TextPositionSpeedSetting from "@/components/setting/text-position-speed";
 import FontSizeColorSetting from "@/components/setting/font-size-color";
+import { Settings, Sliders, Palette } from "lucide-react"; // Change icons
 
 const optionList: {
   name: "room" | "text-position-speed" | "text-color-size" | "app-info";
   label: string;
+  icon: React.ReactNode;
 }[] = [
-  { name: "room", label: "ルーム設定" },
-  { name: "text-position-speed", label: "流れるテキストの位置と速度" },
-  { name: "text-color-size", label: "流れるテキストの色とサイズ" },
+  { name: "room", label: "ルーム設定", icon: <Settings className="w-5 h-5" /> },
+  {
+    name: "text-position-speed",
+    label: "テキスト位置と速度",
+    icon: <Sliders className="w-5 h-5" />,
+  },
+  {
+    name: "text-color-size",
+    label: "テキスト色とサイズ",
+    icon: <Palette className="w-5 h-5" />,
+  },
 ];
 
 const SettingPage = () => {
@@ -35,26 +45,29 @@ const SettingPage = () => {
   };
 
   return (
-    <div className="flex">
+    <div className="flex bg-gray-100">
       {/* サイドメニュー */}
-      <div className="w-60 bg-gray-800 text-white min-h-screen p-4 flex flex-col justify-between">
-        <nav className="space-y-2">
-          {optionList.map(({ name, label }) => (
+      <div className="w-64 bg-gray-900 text-gray-100 min-h-screen p-4 flex flex-col justify-between">
+        <nav className="space-y-1">
+          {optionList.map(({ name, label, icon }) => (
             <button
               key={name}
               onClick={() => setSelectedOption(name)}
               className={cn(
-                "w-full text-left px-4 py-2 rounded-md",
-                selectedOption === name ? "bg-gray-700" : "hover:bg-gray-700"
+                "w-full text-left px-4 py-3 flex items-center space-x-3 transition-all duration-200",
+                selectedOption === name
+                  ? "bg-gray-800 text-blue-400"
+                  : "hover:bg-gray-800"
               )}
             >
-              {label}
+              {icon}
+              <span>{label}</span>
             </button>
           ))}
         </nav>
         <Button
           onClick={onClickStart}
-          className="w-full mt-4 bg-green-500 hover:bg-green-600"
+          className="w-full mt-4 bg-blue-500 hover:bg-blue-600 transition-all duration-200"
           disabled={!isValidWsUrl}
         >
           スタート
@@ -62,10 +75,12 @@ const SettingPage = () => {
       </div>
 
       {/* コンテンツエリア */}
-      <div className="flex-1 p-6 bg-gray-100 min-h-screen max-h-screen overflow-y-auto">
+      <div className="flex-1 p-8 bg-white min-h-screen max-h-screen overflow-y-auto">
         {selectedOption === "room" && (
           <div>
-            <h2 className="text-2xl font-bold mb-4">ルーム設定</h2>
+            <h2 className="text-2xl font-bold mb-6 text-gray-800">
+              ルーム設定
+            </h2>
             <Connection
               onChange={(url) => setOption({ ...option, wsUrl: url })}
               url={option.wsUrl ?? ""}
@@ -75,8 +90,8 @@ const SettingPage = () => {
 
         {selectedOption === "text-position-speed" && (
           <div>
-            <h2 className="text-2xl font-bold mb-4">
-              流れるテキストの位置と速度
+            <h2 className="text-2xl font-bold mb-6 text-gray-800">
+              テキスト位置と速度
             </h2>
             <TextPositionSpeedSetting
               onChangePositions={(positions) =>
@@ -89,8 +104,8 @@ const SettingPage = () => {
 
         {selectedOption === "text-color-size" && (
           <div>
-            <h2 className="text-2xl font-bold mb-4">
-              流れるテキストの色とサイズ
+            <h2 className="text-2xl font-bold mb-6 text-gray-800">
+              テキスト色とサイズ
             </h2>
             <FontSizeColorSetting
               onChangeFontSize={(size) =>
