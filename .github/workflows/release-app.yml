@@ -26,6 +26,13 @@ jobs:
       - name: Build Electron app
         run: npx nextron build --win --${{ matrix.arch }}
 
+      - name: Replace exe name space to underbar
+        run: |
+          Get-ChildItem -Path dist -Filter *.exe | ForEach-Object {
+            $newName = $_.Name -replace ' ', '_'
+            Rename-Item -Path $_.FullName -NewName $newName
+          }
+
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v3
         with:
@@ -75,8 +82,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            /home/runner/work/bolide2/bolide2/artifacts/windows-x64/*.exe
-            /home/runner/work/bolide2/bolide2/artifacts/windows-arm64/*.exe
-            /home/runner/work/bolide2/bolide2/artifacts/macos-universal/*.dmg
+            artifacts/windows-x64/*.exe
+            artifacts/windows-arm64/*.exe
+            artifacts/macos-universal/*.dmg
           draft: true
           prerelease: false
