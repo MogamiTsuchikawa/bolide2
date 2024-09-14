@@ -67,7 +67,9 @@ jobs:
         with:
           path: artifacts
       - name: Display structure of downloaded files
-        run: ls -R artifacts
+        run: |
+          ls -R artifacts
+          find $PWD/artifacts -type f
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
