@@ -9,6 +9,12 @@ type FlowText = {
   line: number;
 };
 
+type CommentMessage = {
+  type?: string;
+  comment?: string | { text?: string };
+  body?: { text?: string };
+};
+
 const FlowTextPage = () => {
   //クエリパラメーターからoptionを取得
   const searchParams = useSearchParams();
@@ -42,6 +48,22 @@ const FlowTextPage = () => {
     };
     return flowText;
   };
+
+  const extractCommentText = (payload: CommentMessage) => {
+    if (payload.type === "comment.created") {
+      return payload.body?.text ?? null;
+    }
+    if (typeof payload.comment === "string") {
+      return payload.comment;
+    }
+    if (payload.comment && typeof payload.comment === "object") {
+      return payload.comment.text ?? null;
+    }
+    if (typeof payload.body?.text === "string") {
+      return payload.body.text;
+    }
+    return null;
+  };
   useEffect(() => {
     if (flowTexts.length !== 0 || !testMode) return;
     let testFlow = [];
@@ -66,8 +88,15 @@ const FlowTextPage = () => {
         console.log("WebSocket connected");
       };
       ws.onmessage = (event) => {
-        const wsData = JSON.parse(event.data);
-        const newFlowText = genFlowText(wsData.comment);
+        let wsData: CommentMessage;
+        try {
+          wsData = JSON.parse(event.data) as CommentMessage;
+        } catch {
+          return;
+        }
+        const commentText = extractCommentText(wsData);
+        if (!commentText) return;
+        const newFlowText = genFlowText(commentText);
         setFlowTexts((prev) => [...prev, newFlowText]);
       };
     }
