@@ -9,7 +9,7 @@
     "dev": "nextron",
     "build": "nextron build",
     "build:check": "nextron build --no-pack",
-    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p renderer/tsconfig.json",
+    "typecheck": "next typegen renderer && tsc --noEmit -p tsconfig.json && tsc --noEmit -p renderer/tsconfig.json",
     "test": "tsx --test tests/*.test.ts",
     "test:electron": "node scripts/electron-smoke.mjs",
     "check": "npm run typecheck && npm test && npm run build:check",
