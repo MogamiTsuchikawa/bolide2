@@ -14,8 +14,6 @@ export default function StopPage() {
           "hover:bg-red-600 hover:text-white"
         )}
         onClick={() => {
-          // ここにテキスト流しを停止する処理を追加
-          console.log("テキスト流しを停止しました");
           window.ipc.send("stop-text-flow", null);
         }}
       >

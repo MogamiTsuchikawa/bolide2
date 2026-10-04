@@ -1,16 +1,18 @@
 "use client";
-import { useState } from "react";
-import Connection from "../../../components/setting/connection";
-import { FlowTextOption } from "../../../../interface/app";
+import { useEffect, useState } from "react";
+import Connection from "@/components/setting/connection";
+import type { FlowTextOption } from "../../../../interface/app";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useWebSocketValidation } from "@/hook/ws-validation";
 import TextPositionSpeedSetting from "@/components/setting/text-position-speed";
-import FontSizeColorSetting from "@/components/setting/font-size-color";
-import { Settings, Sliders, Palette } from "lucide-react"; // Change icons
+import FontSizeColorSetting, { isValidFontColor } from "@/components/setting/font-size-color";
+import { Settings, Sliders, Palette } from "lucide-react";
+
+type SettingSection = "room" | "text-position-speed" | "text-color-size";
 
 const optionList: {
-  name: "room" | "text-position-speed" | "text-color-size" | "app-info";
+  name: SettingSection;
   label: string;
   icon: React.ReactNode;
 }[] = [
@@ -28,9 +30,8 @@ const optionList: {
 ];
 
 const SettingPage = () => {
-  const [selectedOption, setSelectedOption] = useState<
-    "room" | "text-position-speed" | "text-color-size" | "app-info"
-  >("room");
+  const [selectedOption, setSelectedOption] = useState<SettingSection>("room");
+  const [startError, setStartError] = useState("");
   const [option, setOption] = useState<FlowTextOption>({
     fontSize: 100,
     fontColors: ["red", "blue", "green", "yellow", "purple", "pink"],
@@ -39,8 +40,16 @@ const SettingPage = () => {
   });
 
   const isValidWsUrl = useWebSocketValidation(option);
+  const hasValidColors =
+    option.fontColors.length > 0 && option.fontColors.every(isValidFontColor);
+
+  useEffect(() => {
+    return window.ipc.on("flow-text-error", ({ message }) => setStartError(message));
+  }, []);
 
   const onClickStart = () => {
+    if (!isValidWsUrl || !hasValidColors) return;
+    setStartError("");
     window.ipc.send("start-flow-text", option);
   };
 
@@ -68,7 +77,7 @@ const SettingPage = () => {
         <Button
           onClick={onClickStart}
           className="w-full mt-4 bg-blue-500 hover:bg-blue-600 transition-all duration-200"
-          disabled={!isValidWsUrl}
+          disabled={!isValidWsUrl || !hasValidColors}
         >
           スタート
         </Button>
@@ -76,49 +85,49 @@ const SettingPage = () => {
 
       {/* コンテンツエリア */}
       <div className="flex-1 p-8 bg-white min-h-screen max-h-screen overflow-y-auto">
-        {selectedOption === "room" && (
-          <div>
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">
-              ルーム設定
-            </h2>
-            <Connection
-              onChange={(url) => setOption({ ...option, wsUrl: url })}
-              url={option.wsUrl ?? ""}
-            />
-          </div>
+        {startError && (
+          <p role="alert" className="mb-4 text-red-600">{startError}</p>
         )}
+        <div hidden={selectedOption !== "room"}>
+          <h2 className="text-2xl font-bold mb-6 text-gray-800">ルーム設定</h2>
+          <Connection
+            onChange={(url) => setOption((current) => ({ ...current, wsUrl: url }))}
+            url={option.wsUrl ?? ""}
+          />
+        </div>
 
-        {selectedOption === "text-position-speed" && (
-          <div>
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">
-              テキスト位置と速度
-            </h2>
-            <TextPositionSpeedSetting
-              onChangePositions={(positions) =>
-                setOption({ ...option, flowAreas: positions })
-              }
-              currentPositions={option.flowAreas}
-            />
-          </div>
-        )}
+        <div hidden={selectedOption !== "text-position-speed"}>
+          <h2 className="text-2xl font-bold mb-6 text-gray-800">
+            テキスト位置と速度
+          </h2>
+          <TextPositionSpeedSetting
+            onChangePositions={(positions) =>
+              setOption((current) => ({ ...current, flowAreas: positions }))
+            }
+            currentPositions={option.flowAreas}
+          />
+        </div>
 
-        {selectedOption === "text-color-size" && (
-          <div>
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">
-              テキスト色とサイズ
-            </h2>
-            <FontSizeColorSetting
-              onChangeFontSize={(size) =>
-                setOption({ ...option, fontSize: size })
-              }
-              onChangeFontColors={(colors) =>
-                setOption({ ...option, fontColors: colors })
-              }
-              currentFontSize={option.fontSize}
-              currentFontColors={option.fontColors}
-            />
-          </div>
-        )}
+        <div hidden={selectedOption !== "text-color-size"}>
+          <h2 className="text-2xl font-bold mb-6 text-gray-800">
+            テキスト色とサイズ
+          </h2>
+          <FontSizeColorSetting
+            onChangeFontSize={(size) =>
+              setOption((current) => ({ ...current, fontSize: size }))
+            }
+            onChangeFontColors={(colors) =>
+              setOption((current) => ({ ...current, fontColors: colors }))
+            }
+            currentFontSize={option.fontSize}
+            currentFontColors={option.fontColors}
+          />
+          {!hasValidColors && (
+            <p role="alert" className="mt-4 text-sm text-red-600">
+              有効な色コードまたはCSS色名を入力してください。
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

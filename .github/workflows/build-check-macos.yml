@@ -6,27 +6,42 @@ on:
   pull_request:
     branches: ["main", "dev"]
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: macos-latest
+    timeout-minutes: 30
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      NEXT_TELEMETRY_DISABLED: "1"
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: "20.x"
+          node-version: "24.x"
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Check types
+        run: npm run typecheck
 
-      - name: Check build status
-        run: |
-          if [ $? -ne 0 ]; then
-            echo "Build failed"
-            exit 1
-          fi
+      - name: Run tests
+        run: npm test
+
+      - name: Audit dependencies
+        run: npm audit
+
+      - name: Build Electron app
+        run: npm run build -- --publish never
+
+      - name: Test Electron app
+        run: npm run test:electron

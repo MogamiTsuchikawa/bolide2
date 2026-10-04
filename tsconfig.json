@@ -1,19 +1,20 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
+    "allowJs": false,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "incremental": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve"
   },
-  "exclude": ["node_modules", "renderer/next.config.js", "app", "dist"]
+  "include": ["main/**/*.ts", "interface/**/*.d.ts", "tests/**/*.ts"],
+  "exclude": ["node_modules", "app", "dist"]
 }

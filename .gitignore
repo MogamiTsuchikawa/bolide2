@@ -11,3 +11,7 @@ next-env.d.ts
 # build
 /app
 dist
+
+.DS_Store
+*.tsbuildinfo
+/output/playwright/
