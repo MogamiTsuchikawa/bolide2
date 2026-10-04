@@ -154,8 +154,9 @@ async function runSmoke(wsUrl, port) {
   assert.equal(await flow.getByText("新しい形式のコメント", { exact: true })
     .evaluate((node) => node.style.fontSize), "72px");
   await flow.waitForFunction(() => {
-    const comment = document.querySelector('div[style*="animation"]');
-    return comment && comment.getBoundingClientRect().left < window.innerWidth - 100;
+    const comments = [...document.querySelectorAll('div[style*="animation"]')];
+    return comments.length === 2 && comments.every((comment) =>
+      comment.getBoundingClientRect().right < window.innerWidth - 100);
   });
   await screenshot(flow, "flow");
   await until(async () => await comments.count() === 0, "finished comments removed", 12_000);
