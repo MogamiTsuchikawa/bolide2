@@ -5,9 +5,17 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: read
+
+env:
+  CSC_IDENTITY_AUTO_DISCOVERY: "false"
+  NEXT_TELEMETRY_DISABLED: "1"
+
 jobs:
   build-windows:
     runs-on: windows-latest
+    timeout-minutes: 30
     strategy:
       matrix:
         arch: [x64, arm64]
@@ -15,18 +23,30 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: "20.x"
+          node-version: "24.x"
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Check types
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test
+
+      - name: Audit dependencies
+        run: npm audit
+
       - name: Build Electron app
-        run: npx nextron build --win --${{ matrix.arch }}
+        run: npx nextron build --win --${{ matrix.arch }} --publish never
 
       - name: Replace exe name space to underbar and add architecture
         run: |
@@ -37,7 +57,7 @@ jobs:
           }
 
       - name: create release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         if: startsWith(github.ref, 'refs/tags/')
         with:
           draft: true
@@ -48,25 +68,38 @@ jobs:
 
   build-macos:
     runs-on: macos-latest
+    timeout-minutes: 30
     permissions:
       contents: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: "20.x"
+          node-version: "24.x"
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Check types
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test
+
+      - name: Audit dependencies
+        run: npm audit
+
       - name: Build Electron app
-        run: npx nextron build --mac --universal
+        run: npx nextron build --mac --universal --publish never
 
       - name: create release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         if: startsWith(github.ref, 'refs/tags/')
         with:
           draft: true

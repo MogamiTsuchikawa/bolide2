@@ -10,12 +10,12 @@
     "node_modules"
   ],
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./*"
       ]
     },
+    "jsx": "react-jsx",
     "plugins": [
       {
         "name": "next"

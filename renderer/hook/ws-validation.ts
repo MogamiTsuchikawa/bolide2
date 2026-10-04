@@ -1,32 +1,31 @@
 import { useState, useEffect } from "react";
-import { FlowTextOption } from "@/../interface/app";
+import type { FlowTextOption } from "../../interface/app";
+import { isWebSocketUrl, validateWebSocketConnection } from "../lib/connection";
+
+const VALIDATION_DEBOUNCE_MS = 350;
 
 export function useWebSocketValidation(option: FlowTextOption) {
-  const [isValidWsUrl, setIsValidWsUrl] = useState(false);
+  const [result, setResult] = useState<{ url: string; isValid: boolean } | null>(null);
+  const url = option.wsUrl ?? "";
 
   useEffect(() => {
-    const validateWsUrl = async () => {
-      if (!option.wsUrl) {
-        setIsValidWsUrl(false);
-        return;
-      }
+    setResult(null);
+    if (!isWebSocketUrl(url)) return;
 
-      try {
-        const ws = new WebSocket(option.wsUrl);
-        ws.onopen = () => {
-          setIsValidWsUrl(true);
-          ws.close();
-        };
-        ws.onerror = () => {
-          setIsValidWsUrl(false);
-        };
-      } catch (error) {
-        setIsValidWsUrl(false);
-      }
+    let active = true;
+    let cancelValidation: (() => void) | undefined;
+    const debounce = setTimeout(() => {
+      cancelValidation = validateWebSocketConnection(url, (isValid) => {
+        if (active) setResult({ url, isValid });
+      });
+    }, VALIDATION_DEBOUNCE_MS);
+
+    return () => {
+      active = false;
+      clearTimeout(debounce);
+      cancelValidation?.();
     };
+  }, [url]);
 
-    validateWsUrl();
-  }, [option.wsUrl]);
-
-  return isValidWsUrl;
+  return result?.url === url && result.isValid;
 }

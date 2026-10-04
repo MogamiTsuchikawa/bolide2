@@ -10,6 +10,14 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  buildConnectionUrl,
+  connectionSettingsFromUrl,
+  normalizeRoomId,
+  ROOM_ID_LENGTH,
+  type ConnectionSettings,
+  type ServerType,
+} from "@/lib/connection";
 
 type ConnectionSettingProps = {
   url: string;
@@ -17,55 +25,68 @@ type ConnectionSettingProps = {
 };
 
 const ConnectionSetting = ({ onChange, url }: ConnectionSettingProps) => {
-  const [serverType, setServerType] = useState("digicre");
-  const [roomName, setRoomName] = useState("");
-  const [customUrl, setCustomUrl] = useState("");
+  const [settings, setSettings] = useState(() => connectionSettingsFromUrl(url));
+  const { serverType, roomName, roomId, serverUrl, customUrl } = settings;
 
-  const handleServerChange = (value: string) => {
-    setServerType(value);
-    updateUrl(value, roomName, customUrl);
-  };
-
-  const handleInputChange = (value: string) => {
-    if (serverType === "custom") {
-      setCustomUrl(value);
-    } else {
-      setRoomName(value);
-    }
-    updateUrl(serverType, value, value);
-  };
-
-  const updateUrl = (type: string, room: string, custom: string) => {
-    if (type === "custom") {
-      onChange(custom);
-    } else {
-      onChange(`wss://bolide.digicre.net/api/v1/room/${room}`);
-    }
+  const updateSettings = (changes: Partial<ConnectionSettings>) => {
+    const next = { ...settings, ...changes };
+    setSettings(next);
+    onChange(buildConnectionUrl(next));
   };
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="server-select">サーバータイプ</Label>
-        <Select onValueChange={handleServerChange} defaultValue="digicre">
+        <Select
+          onValueChange={(value: ServerType) => updateSettings({ serverType: value })}
+          value={serverType}
+        >
           <SelectTrigger id="server-select" className="w-[200px]">
             <SelectValue placeholder="サーバーを選択" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="bolide2">bolide2 サーバー</SelectItem>
             <SelectItem value="digicre">デジクリ</SelectItem>
             <SelectItem value="custom">カスタム</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {serverType === "custom" ? (
+      {serverType === "bolide2" ? (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="server-url">サーバーURL</Label>
+            <Input
+              id="server-url"
+              placeholder="例: https://your-worker-domain.workers.dev"
+              value={serverUrl}
+              onChange={(e) => updateSettings({ serverUrl: e.target.value })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="room-id">
+              ルームID（英大文字・数字 {ROOM_ID_LENGTH} 文字）
+            </Label>
+            <Input
+              id="room-id"
+              placeholder="例: 1A2B3C4D5E6F7G8H"
+              value={roomId}
+              autoCapitalize="characters"
+              onChange={(e) =>
+                updateSettings({ roomId: normalizeRoomId(e.target.value) })
+              }
+            />
+          </div>
+        </div>
+      ) : serverType === "custom" ? (
         <div className="space-y-2">
           <Label htmlFor="custom-url">カスタム接続先URL</Label>
           <Input
             id="custom-url"
             placeholder="例: wss://example.com/api/v1/room/your-room"
             value={customUrl}
-            onChange={(e) => handleInputChange(e.target.value)}
+            onChange={(e) => updateSettings({ customUrl: e.target.value })}
           />
         </div>
       ) : (
@@ -75,7 +96,7 @@ const ConnectionSetting = ({ onChange, url }: ConnectionSettingProps) => {
             id="room-name"
             placeholder="例: my-room"
             value={roomName}
-            onChange={(e) => handleInputChange(e.target.value)}
+            onChange={(e) => updateSettings({ roomName: e.target.value })}
           />
         </div>
       )}
