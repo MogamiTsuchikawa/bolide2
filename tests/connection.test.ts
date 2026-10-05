@@ -9,6 +9,13 @@ import {
   validateWebSocketConnection,
   type ConnectionSettings,
 } from "../renderer/lib/connection";
+import {
+  DEFAULT_SERVER_ORIGIN,
+  parseRoomLink,
+  parseServerOrigin,
+  roomConnectionFromSocket,
+  resolveRoomPage,
+} from "../renderer/lib/room-connection";
 
 const settings: ConnectionSettings = {
   serverType: "bolide2",
@@ -64,6 +71,68 @@ test("existing generated URLs restore the corresponding connection fields", () =
   assert.equal(connectionSettingsFromUrl(customUrl).customUrl, customUrl);
   assert.equal(connectionSettingsFromUrl(customUrl).serverType, "custom");
   assert.equal(connectionSettingsFromUrl("wss://bolide.digicre.net/api/v1/room/%XX").serverType, "custom");
+});
+
+test("imports a participant URL and desktop link into the same room connection", () => {
+  const participantUrl = `https://example.com/rooms/${settings.roomId}`;
+  const room = parseRoomLink(` ${participantUrl} `);
+  assert.ok(room);
+  assert.equal(room.participantUrl, participantUrl);
+  assert.equal(room.manageUrl, `${participantUrl}/manage`);
+  assert.equal(room.historyUrl, `${participantUrl}/history`);
+  assert.equal(room.wsUrl, `wss://example.com/rooms/${settings.roomId}/ws`);
+  assert.deepEqual(parseRoomLink(`bolide2://rooms/${settings.roomId}?server=${encodeURIComponent("https://example.com")}`), room);
+  assert.deepEqual(parseRoomLink(`${participantUrl}/`), room);
+  assert.deepEqual(roomConnectionFromSocket(room.wsUrl), room);
+  const dev = parseRoomLink(`http://127.0.0.1:8787/rooms/${settings.roomId}`);
+  assert.equal(dev?.wsUrl, `ws://127.0.0.1:8787/rooms/${settings.roomId}/ws`);
+  assert.equal(parseServerOrigin("http://localhost:8787"), "http://localhost:8787");
+  assert.equal(parseServerOrigin("http://[::1]:8787"), "http://[::1]:8787");
+});
+
+test("rejects links with unsafe protocols, credentials, ambiguous paths or queries", () => {
+  const validLink = `bolide2://rooms/${settings.roomId}?server=${encodeURIComponent("https://example.com")}`;
+  for (const value of [
+    `https://user:secret@example.com/rooms/${settings.roomId}`,
+    `http://example.com/rooms/${settings.roomId}`,
+    `file:///rooms/${settings.roomId}`,
+    `https://example.com/rooms/${settings.roomId}?token=secret`,
+    `https://example.com/rooms/${settings.roomId}?`,
+    `https://example.com/rooms/${settings.roomId}#`,
+    `https://example.com/rooms/previous/../${settings.roomId}`,
+    `https://example.com/rooms/${settings.roomId}/manage`,
+    `https://example.com/rooms/${settings.roomId.toLowerCase()}`,
+    `bolide2://rooms/${settings.roomId}`,
+    `bolide2://other/${settings.roomId}?server=https://example.com`,
+    `bolide2://rooms:123/${settings.roomId}?server=https://example.com`,
+    `bolide2://user@rooms/${settings.roomId}?server=https://example.com`,
+    `${validLink}&server=https://attacker.example`,
+    `${validLink}&start=true`,
+    `${validLink}#ignored`,
+    `bolide2://rooms/${settings.roomId}?server=${encodeURIComponent("https://example.com/extra")}`,
+    `bolide2://rooms/${settings.roomId}?server=${encodeURIComponent("https://example.com?token=1")}`,
+    `bolide2://rooms/${settings.roomId}?server=${encodeURIComponent("https://user:secret@example.com")}`,
+    `bolide2://rooms/${settings.roomId}?server=${encodeURIComponent("http://example.com")}`,
+    `bolide2://rooms/${settings.roomId}?server=${encodeURIComponent("javascript:alert(1)")}`,
+  ]) assert.equal(parseRoomLink(value), null, value);
+  for (const value of ["https:example.com", "https://example.com\\", "https://example.com/path", "https://example.com?", "https://example.com#", "https://user@example.com", "http://localhost.example.com", "https://example.com\n"]) {
+    assert.equal(parseServerOrigin(value), null, value);
+  }
+});
+
+test("external browser IPC only generates known room and dashboard pages", () => {
+  const connectionUrl = `wss://example.com/rooms/${settings.roomId}/ws`;
+  assert.equal(resolveRoomPage({ action: "dashboard" }), `${DEFAULT_SERVER_ORIGIN}/`);
+  assert.equal(resolveRoomPage({ action: "dashboard", connectionUrl }), "https://example.com/");
+  assert.equal(resolveRoomPage({ action: "manage", connectionUrl }), `https://example.com/rooms/${settings.roomId}/manage`);
+  assert.equal(resolveRoomPage({ action: "participant", connectionUrl }), `https://example.com/rooms/${settings.roomId}`);
+  assert.equal(resolveRoomPage({ action: "history", connectionUrl }), `https://example.com/rooms/${settings.roomId}/history`);
+  for (const value of [null, [], "https://example.com", { action: "open", url: "file:///tmp" }, { action: "manage", connectionUrl: "wss://example.com/other" }, { action: "history", connectionUrl: 1 }]) {
+    assert.equal(resolveRoomPage(value), null);
+  }
+  for (const connectionUrl of ["wss://user:secret@example.com/rooms/1A2B3C4D5E6F7G8H/ws", "wss://example.com/rooms/1A2B3C4D5E6F7G8H/ws?token=1", "ws://remote.example.com/rooms/1A2B3C4D5E6F7G8H/ws"]) {
+    assert.equal(roomConnectionFromSocket(connectionUrl), null);
+  }
 });
 
 class FakeSocket {

@@ -3,7 +3,6 @@
 import { memo, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
-  FLOW_ANIMATION_DURATION_MS,
   parseCommentMessage,
   parseFlowTextOptions,
   selectFlowColor,
@@ -32,7 +31,7 @@ const FlowTextPage = () => {
 
     const timeout = window.setTimeout(() => {
       window.ipc.send("back-to-setting", null);
-    }, FLOW_ANIMATION_DURATION_MS);
+    }, options.flowDurationMs);
     return () => window.clearTimeout(timeout);
   }, [options]);
 
@@ -77,6 +76,7 @@ const FlowTextPage = () => {
         <AnimationText
           flowText={flowText}
           fontSize={options.fontSize}
+          durationMs={options.flowDurationMs}
           onComplete={removeFlowText}
           key={flowText.id}
         />
@@ -106,12 +106,14 @@ export default function FlowTextRoute() {
 type AnimationTextProps = {
   flowText: FlowText;
   fontSize: number;
+  durationMs: number;
   onComplete: (id: string) => void;
 };
 
 const AnimationText = memo(function AnimationText({
   flowText,
   fontSize,
+  durationMs,
   onComplete,
 }: AnimationTextProps) {
   return (
@@ -121,7 +123,7 @@ const AnimationText = memo(function AnimationText({
         position: "absolute",
         left: "100%",
         top: `${flowText.line}%`,
-        animation: `flow-text ${FLOW_ANIMATION_DURATION_MS}ms linear forwards`,
+        animation: `flow-text ${durationMs}ms linear forwards`,
         fontSize: `${fontSize}px`,
         color: flowText.color,
         fontWeight: "bold",

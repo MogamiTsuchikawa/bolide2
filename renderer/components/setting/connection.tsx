@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -27,6 +27,14 @@ type ConnectionSettingProps = {
 const ConnectionSetting = ({ onChange, url }: ConnectionSettingProps) => {
   const [settings, setSettings] = useState(() => connectionSettingsFromUrl(url));
   const { serverType, roomName, roomId, serverUrl, customUrl } = settings;
+
+  // A browser deep link or pasted room URL can change the connection externally.
+  // Keep partially edited fields when they still describe the current URL.
+  useEffect(() => {
+    setSettings((current) => buildConnectionUrl(current) === url
+      ? current
+      : connectionSettingsFromUrl(url));
+  }, [url]);
 
   const updateSettings = (changes: Partial<ConnectionSettings>) => {
     const next = { ...settings, ...changes };

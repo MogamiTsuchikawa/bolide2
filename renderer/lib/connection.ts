@@ -1,3 +1,5 @@
+import { DEFAULT_SERVER_ORIGIN } from "./room-connection";
+
 export const ROOM_ID_LENGTH = 16;
 
 export type ServerType = "bolide2" | "digicre" | "custom";
@@ -70,7 +72,7 @@ export function connectionSettingsFromUrl(value: string): ConnectionSettings {
     serverType: value ? "custom" : "bolide2",
     roomName: "",
     roomId: "",
-    serverUrl: "",
+    serverUrl: DEFAULT_SERVER_ORIGIN,
     customUrl: value,
   };
   if (!isWebSocketUrl(value)) return settings;

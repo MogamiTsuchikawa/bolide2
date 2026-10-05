@@ -24,11 +24,13 @@
     "electron-serve": "^3.0.1",
     "electron-store": "^11.0.2",
     "lucide-react": "^1.52.0",
+    "qrcode": "^1.5.4",
     "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^24.19.1",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "electron": "^44.5.1",
