@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ConnectionSetting from "./connection";
 import RoomInvite from "./room-invite";
-import { parseRoomLink, roomConnectionFromSocket, type RoomPageAction } from "@/lib/room-connection";
+import { DEFAULT_SERVER_ORIGIN, parseRoomLink, roomConnectionFromSocket, type RoomPageAction } from "@/lib/room-connection";
 import type { ConnectionStatus } from "@/hook/ws-validation";
 
 export default function PresenterRoom({ url, onChange, connectionStatus, onRetryConnection }: {
@@ -62,7 +62,7 @@ export default function PresenterRoom({ url, onChange, connectionStatus, onRetry
         <p className="text-sm text-slate-600">ブラウザから開けない場合は、ルームの参加URLを貼り付けてください。</p>
         <Label htmlFor="participant-room-url">参加URL</Label>
         <div className="flex flex-wrap gap-2">
-          <Input id="participant-room-url" type="url" placeholder="https://bolide2-server.mogami.workers.dev/rooms/…" value={input} onChange={(event) => setInput(event.target.value)} className="min-w-56 flex-1" />
+          <Input id="participant-room-url" type="url" placeholder={`${DEFAULT_SERVER_ORIGIN}/rooms/…`} value={input} onChange={(event) => setInput(event.target.value)} className="min-w-56 flex-1" />
           <Button onClick={apply} className="gap-2"><Link2 className="size-4" />このルームを使う</Button>
         </div>
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}

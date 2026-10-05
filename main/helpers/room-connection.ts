@@ -1,4 +1,4 @@
-export const DEFAULT_SERVER_ORIGIN = "https://bolide2-server.mogami.workers.dev";
+export const DEFAULT_SERVER_ORIGIN = "https://bolide2-server.mogami.dev";
 
 export type RoomConnection = {
   roomId: string;
