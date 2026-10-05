@@ -10,3 +10,7 @@ files:
       - package.json
       - app
 publish: null
+protocols:
+  - name: bolide2 room
+    schemes:
+      - bolide2

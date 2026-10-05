@@ -13,6 +13,7 @@ export type FlowTextOptions = {
   windowWidth: number;
   testMode: boolean;
   wsUrl: string;
+  flowDurationMs: number;
 };
 
 export const FLOW_ANIMATION_DURATION_MS = 10_000;
@@ -81,6 +82,7 @@ export const parseFlowTextOptions = (
     .map(Number)
     .filter((area) => Number.isFinite(area) && area >= 0 && area <= 100);
   const wsUrl = searchParams.get("wsUrl")?.trim() ?? "";
+  const duration = Number(searchParams.get("flowDurationSeconds"));
   let validWsUrl = "";
   try {
     const url = new URL(wsUrl);
@@ -102,6 +104,9 @@ export const parseFlowTextOptions = (
     windowWidth: positiveNumber(searchParams.get("windowWidth"), 1000),
     testMode: searchParams.get("testMode") === "true",
     wsUrl: validWsUrl,
+    flowDurationMs: Number.isFinite(duration) && duration >= 3 && duration <= 30
+      ? duration * 1000
+      : FLOW_ANIMATION_DURATION_MS,
   };
 };
 

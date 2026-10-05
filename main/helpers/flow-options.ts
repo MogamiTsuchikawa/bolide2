@@ -9,7 +9,7 @@ export const normalizeFlowTextOption = (value: unknown): FlowTextOption => {
     throw new Error("表示設定を確認してください。");
   }
 
-  const { fontSize, fontColors, flowAreas, testMode, wsUrl } = value;
+  const { fontSize, fontColors, flowAreas, testMode, wsUrl, flowDurationSeconds } = value;
   if (typeof fontSize !== "number" || !Number.isFinite(fontSize) || fontSize <= 0) {
     throw new Error("フォントサイズには 0 より大きい数値を入力してください。");
   }
@@ -44,6 +44,12 @@ export const normalizeFlowTextOption = (value: unknown): FlowTextOption => {
   if (typeof testMode !== "boolean") {
     throw new Error("テストモードの設定を確認してください。");
   }
+  if (flowDurationSeconds !== undefined && (
+    typeof flowDurationSeconds !== "number" || !Number.isFinite(flowDurationSeconds) ||
+    flowDurationSeconds < 3 || flowDurationSeconds > 30
+  )) {
+    throw new Error("表示速度には 3〜30 秒の数値を入力してください。");
+  }
   if (wsUrl !== undefined && typeof wsUrl !== "string") {
     throw new Error("WebSocket URL を確認してください。");
   }
@@ -75,6 +81,7 @@ export const normalizeFlowTextOption = (value: unknown): FlowTextOption => {
     fontColors: fontColors.map((color: string) => color.trim()),
     flowAreas: [...flowAreas],
     testMode,
+    flowDurationSeconds: typeof flowDurationSeconds === "number" ? flowDurationSeconds : 10,
     ...(normalizedUrl ? { wsUrl: normalizedUrl } : {}),
   };
 };

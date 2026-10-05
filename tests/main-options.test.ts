@@ -28,6 +28,15 @@ test("test mode permits an omitted WebSocket URL", () => {
   assert.throws(() => normalizeFlowTextOption(option), /WebSocket URL/);
 });
 
+test("validates display speed before a presentation starts and preserves legacy defaults", () => {
+  assert.equal(normalizeFlowTextOption(validOption).flowDurationSeconds, 10);
+  assert.equal(normalizeFlowTextOption({ ...validOption, flowDurationSeconds: 3 }).flowDurationSeconds, 3);
+  assert.equal(normalizeFlowTextOption({ ...validOption, flowDurationSeconds: 30 }).flowDurationSeconds, 30);
+  for (const flowDurationSeconds of [NaN, Infinity, 0, 2, 31, "10", null]) {
+    assert.throws(() => normalizeFlowTextOption({ ...validOption, flowDurationSeconds }), /表示速度/);
+  }
+});
+
 test("accepts 100 colors and positions at the settings limit", () => {
   const option = normalizeFlowTextOption({
     ...validOption,

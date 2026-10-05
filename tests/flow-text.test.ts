@@ -95,11 +95,20 @@ test("reads windowHeight and keeps valid color, position, and connection values"
     windowWidth: 1920,
     testMode: true,
     wsUrl: "wss://example.com/comments",
+    flowDurationMs: 10000,
   });
   assert.equal(
     parseFlowTextOptions(new URLSearchParams({ windowHight: "720" })).windowHeight,
     720,
   );
+});
+
+test("uses the configured traversal duration while retaining defaults for invalid values", () => {
+  assert.equal(parseFlowTextOptions(new URLSearchParams({ flowDurationSeconds: "3" })).flowDurationMs, 3000);
+  assert.equal(parseFlowTextOptions(new URLSearchParams({ flowDurationSeconds: "30" })).flowDurationMs, 30000);
+  for (const value of ["", "NaN", "Infinity", "-1", "2", "31", "10px"]) {
+    assert.equal(parseFlowTextOptions(new URLSearchParams({ flowDurationSeconds: value })).flowDurationMs, 10000);
+  }
 });
 
 test("keeps CSS function commas in JSON encoded colors and accepts old lists", () => {
